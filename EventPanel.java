@@ -5,8 +5,18 @@
 package tripPackage;
 
 import java.awt.*;
+
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.Random;
 
 public class EventPanel extends JPanel{
   JLabel [] names = new JLabel[TripV2.numEvents];
@@ -25,16 +35,54 @@ public class EventPanel extends JPanel{
   private JButton check = new JButton("Check Sequence");
   private JButton clue = new JButton("Clue");
   private JComboBox[] orderList = new JComboBox[TripV2.numEvents];
+  /// STARSHIPLADS CODE
+  private Timer timer;
+  private int countdown,countdown1 =0;
+  private int[] backgroundColor;
+  private Random rand = new Random();
+  /// /STARSHIPALDS CODE
   Event[] events;
   String[] clues;//=new String[(TripV2.total-1)*2];
   private int score= -5+((TripV2.total-1)*6);
   private int clueCount =0;
-  
+  public static void playAudio(String soundFile) {
+		AudioInputStream audioIn = null;
+	    File f = new File(soundFile);
+	    try {
+			audioIn = AudioSystem.getAudioInputStream(f.toURI().toURL());
+		} catch (MalformedURLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (UnsupportedAudioFileException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}  
+	    Clip clip = null;
+		try {
+			clip = AudioSystem.getClip();
+		} catch (LineUnavailableException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    try {
+			clip.open(audioIn);
+		} catch (LineUnavailableException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    clip.start();
+	}
   public EventPanel(Event[] events, String[] clues){
     this.events= events;
     for(int i=0; i<clueLabels.length; i++){
       clueLabels[i]= new JLabel(""+(i+1)+")");
-    }//loop initialising clueLabels
+    }//loop initializing clueLabels
     this.clues=clues;
     ButtonListener b1= new ButtonListener();
     cluePanel.setLayout(new GridLayout(((TripV2.total-1)*2),1));
@@ -86,8 +134,14 @@ public class EventPanel extends JPanel{
     for(clueCount=0;clueCount<3;clueCount++){
       clueLabels[clueCount].setText((clueCount+1)+") "+this.clues[clueCount]);
     }//end of loop displaying first clues 
+    /// STARSHIPLADS CODE
+    timer= new Timer(666,b1);
+    timer.start();
+    this.backgroundColor = new int[]{rand.nextInt(255),rand.nextInt(255),rand.nextInt(255)};
+    playAudio("./tripPackage/music.wav");
+    ///  /STARSHIPLADS CODE
   }//end of constructor
-  
+
   private class ButtonListener implements ActionListener{
     
     public void actionPerformed(ActionEvent e){
@@ -124,6 +178,38 @@ public class EventPanel extends JPanel{
         scoreShow.setText(""+score);
         checker.setText("Game Over");
       }//end of score check
+      if(e.getSource()==timer) {
+    	  if(countdown>0) {
+  			countdown--;
+  			countdown1--;
+  		}
+  		else{
+  			int o=0;
+  			while(o<backgroundColor.length) {
+  				if(rand.nextInt(200)%2==0) {
+  					backgroundColor[o] += 5;
+  					if(backgroundColor[o]>=255) {
+  						backgroundColor[o]=255;
+  					}
+  				}
+  				else {
+  					backgroundColor[o] -= 5;
+  					System.out.println(""+ backgroundColor[0] + " " + backgroundColor[1] + " " + backgroundColor[2]);
+  					if(backgroundColor[o]<=0) {
+  						backgroundColor[o]=0;
+  					}
+  				}
+  				o++;
+  			}
+  			setBackground(new Color(backgroundColor[0],backgroundColor[1],backgroundColor[2]));
+  			countdown=1;
+  		}
+  		if(countdown1<=0) {
+  			System.out.println("!!!!!!\t JOSIE ITS 100 \t!!!!");
+  			backgroundColor = new int[]{rand.nextInt(255),rand.nextInt(255),rand.nextInt(255)};
+  			countdown1=100;
+  		}
+      }
     }//end of method action performed
   }//end of inner class ButtonListener
   
