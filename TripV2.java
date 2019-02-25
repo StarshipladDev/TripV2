@@ -7,27 +7,29 @@ package tripPackage;
 import java.util.Random;
 import javax.swing.*;
 
-public class TripV2{
+public class TripV2 extends JFrame{
   static Random rand = new Random();
   static int numEvents=0;
   static int total= rand.nextInt(6)+4;
   static int[] soFar = new int[total];
   static Event[] events = new Event[total];
-  
+  public TripV2(String title){
+	  int count=0;
+	    while(count<total){
+	      events[count]=generate(count);
+	      count++;
+	    }//end of while loop
+	    renumber();
+	    ClueGen clueA = new ClueGen(events);
+	    setDefaultCloseOperation (WindowConstants.EXIT_ON_CLOSE);
+	    getContentPane().add(new EventPanel(shuffle(), clueA.getClues())); 
+	    setUndecorated(true);
+	    pack();
+	    setVisible(true);
+  }
   public static void main(String[] args){
-    int count=0;
-    while(count<total){
-      events[count]=generate(count);
-      count++;
-    }//end of while loop
-    renumber();
-    ClueGen clueA = new ClueGen(events);
     //graphics code
-    JFrame frame = new JFrame ("TIME PARADOX");
-    frame.setDefaultCloseOperation (WindowConstants.EXIT_ON_CLOSE);
-    frame.getContentPane().add(new EventPanel(shuffle(), clueA.getClues())); 
-    frame.pack();
-    frame.setVisible(true);
+    TripV2 frame = new TripV2 ("TIME PARADOX");
   }//end of main method
    
   /**Randomly generates instances of event class*/
