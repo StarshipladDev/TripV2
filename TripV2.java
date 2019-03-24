@@ -4,6 +4,7 @@
  
 package tripPackage;
 
+import java.awt.BorderLayout;
 import java.util.Random;
 import javax.swing.*;
 

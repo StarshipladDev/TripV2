@@ -5,8 +5,8 @@ package tripPackage;
 public class Event{
   private int sequence;
   //private boolean happened;
-  private String name;
-  
+  private String name="null";
+  private int id=0;
   /**Default constructor, needed so array 'events' in main method can be initialised with null values*/
   public Event(){
   }//end of default constructor
@@ -17,6 +17,7 @@ public class Event{
    Takes int n to set name from a series of options
   */
   public Event(int s, int h, int n){
+	id=n;
     boolean happened;
     if(h<4)
       happened=true;
@@ -26,6 +27,8 @@ public class Event{
       sequence=s;
     else
       sequence=0;
+    if(n==0)
+        name="Null";
     if(n==1)
       name="Sex";
     else if(n==2)
@@ -57,7 +60,13 @@ public class Event{
   public String getName(){
     return name;
   }//end of accessor getName
-  
+  /**
+   * 
+   * Accessor method for id
+   * */
+  public int getId(){
+	    return id;
+	  }
   /**Accessor method for sequence*/
   public int getPosition(){
     return sequence;
@@ -74,7 +83,7 @@ public class Event{
     while(niceGap.length()<27-name.length()){
       niceGap+=" ";
     }//end of while loop
-    return "Event: "+name+niceGap+"\t Sequence position: "+sequence+"\t Happened: "+(sequence==0);
+    return "Event: "+name+niceGap+"\t Sequence position: "+sequence+"\t Happened: "+!(sequence==0);
   }//end of toString method
   
 }//end of class

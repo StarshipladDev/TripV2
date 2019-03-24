@@ -6,9 +6,11 @@ package tripPackage;
 
 import java.awt.*;
 
+import javax.imageio.ImageIO;
 import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -26,51 +28,50 @@ public class EventPanel extends JPanel{
 	private JLabel instruc1 = new JLabel("Select the order in which you think events happened. If you don't think an event happened, select zero.");
 	private JLabel instruc2 = new JLabel("An incorrect guess will subtract one from your score. Requesting a clue will subtract 3.");
 	private JLabel instruc3 = new JLabel("If your score reaches zero, you lose the game.");
-	private JPanel[] each = new JPanel[TripV2.numEvents];
+	private Each[] each;
 	private JLabel[] clueLabels = new JLabel[(TripV2.total-1)*2];
-	private JButton check = new JButton("Check Sequence");
-	private JButton clue = new JButton("Clue");
-	
-	private JComboBox[] orderList = new JComboBox[TripV2.numEvents];
+	private JButton check = new JButton();
+	private JButton clue = new JButton();
 	/// STARSHIPLADS CODE
-	private JButton quit = new JButton ("Quit");
+	private JButton quit = new JButton ();
 	private Timer timer;
 	private int countdown,countdown1 =0;
 	private int[] backgroundColor;
 	private Random rand = new Random();
+	private BufferedImage[] images = new BufferedImage[3];
 	/// End of STARSHIPALDS CODE
 	Event[] events;
 	String[] clues;//=new String[(TripV2.total-1)*2];
 	private int score= -5+((TripV2.total-1)*6);
 	private int clueCount =0;
 	public EventPanel(Event[] events, String[] clues){
-		this.events= events;
+
+		//setLayout(new BorderLayout());
 		for(int i=0; i<clueLabels.length; i++){
 			clueLabels[i]= new JLabel(""+(i+1)+")");
 		}//loop initializing clueLabels
+		/// STARSHIPLADS CODE
+		this.events= new Event[events.length+1];
+		for(int i=0; i<events.length; i++){
+			this.events[i]= events[i];
+		}
+		this.events[events.length]=new Event(0,5,0);
+		for(int i=0; i<this.events.length; i++){
+		}
+		each = new Each[this.events.length-1];
+		//Populate 'each'
+		for(int p =0;p<each.length;p++){
+			each[p] = new Each(this.events,p);
+			each[p].setPreferredSize(new Dimension(250,66));
+			each[p].setLayout(new BorderLayout());
+		}
+		/// END OF STARSHIPLADS CODE
 		this.clues=clues;
 		ButtonListener b1= new ButtonListener(this);
 		cluePanel.setLayout(new GridLayout(((TripV2.total-1)*2),1));
+		//end of for loop initialising JTextFields and adding to event panel
 		for(int p =0;p<each.length;p++){
-			each[p] = new JPanel();
-			each[p].setPreferredSize(new Dimension(250,30));
-			each[p].setLayout(new BorderLayout());
-		}
-		for(int j=0;j<names.length;j++){
-			names[j]= new JLabel(events[j].getName());
-			//add listener/comboBox for name
-			each[j].add(names[j], BorderLayout.WEST);
-		}//end of for loop initialising JTextFields and adding to event panel
-		Integer[] possSeq=new Integer[TripV2.numEvents+1];
-		for(int x=0;x<possSeq.length;x++){
-			possSeq[x]=x;
-		}
-		for(int b=0;b<orderList.length;b++){
-			orderList[b]=new JComboBox(possSeq);
-			each[b].add(orderList[b],BorderLayout.EAST);
-		}//end of for loop initialising JComboBoxes
-		for(JPanel p:each){
-			eventPanel.add(p);
+			eventPanel.add(each[p]);
 		}
 		for(JLabel j: clueLabels){
 			cluePanel.add(j);
@@ -78,30 +79,47 @@ public class EventPanel extends JPanel{
 		scoreShow.setText(""+score);
 		check.addActionListener(b1);
 		clue.addActionListener(b1);
-		buttonPanel.add(scoreLabel);
-		buttonPanel.add(scoreShow);
-		buttonPanel.add(check);
-		buttonPanel.add(checker);
-		buttonPanel.add(clue);
 		instructionPanel.add(instruc1);
 		instructionPanel.add(instruc2);
 		instructionPanel.add(instruc3);
-		eventPanel.setPreferredSize(new Dimension(250,450));
-		cluePanel.setPreferredSize(new Dimension(850,450));
-		instructionPanel.setPreferredSize(new Dimension(1350,100));
+		eventPanel.setPreferredSize(new Dimension(450,1200));
+		cluePanel.setPreferredSize(new Dimension(450,450));
+		instructionPanel.setPreferredSize(new Dimension(1100,100));
 		buttonPanel.setPreferredSize(new Dimension(150,450));
-		
-		setPreferredSize(new Dimension(1350,600));
+		setPreferredSize(new Dimension(1300,1200));
 		//displaying first 3 clues:
 		for(clueCount=0;clueCount<3;clueCount++){
 			clueLabels[clueCount].setText((clueCount+1)+") "+this.clues[clueCount]);
 		}//end of loop displaying first clues 
 		/// STARSHIPLADS CODE
+		
 		timer= new Timer(666,b1);
 		timer.start();
 		this.backgroundColor = new int[]{rand.nextInt(255),rand.nextInt(255),rand.nextInt(255)};
 		playAudio("./tripPackage/music.wav");
+		//Import files to use as quit/clue/check buttons
+		try {
+			images[0]=ImageIO.read(new File("tripPackage/Images/Cluebut.png"));
+			images[1]=ImageIO.read(new File("tripPackage/Images/Checkbut.png"));
+			images[2]=ImageIO.read(new File("tripPackage/Images/Quitbut.png"));
+			clue.setIcon(new ImageIcon(images[0]));
+			clue.setBorderPainted(false);
+			check.setIcon(new ImageIcon(images[1]));
+			check.setBorderPainted(false);
+			quit.setIcon(new ImageIcon(images[2]));
+			quit.setBorderPainted(false);
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(0);
+		}
+		buttonPanel.add(scoreLabel);
+		buttonPanel.add(scoreShow);
+		buttonPanel.add(check);
+		buttonPanel.add(clue);
 		buttonPanel.add(quit);
+		buttonPanel.add(checker);
 		quit.addActionListener(b1);
 		///End of STARSHIPLADS CODE
 		add(instructionPanel);
@@ -160,7 +178,7 @@ public class EventPanel extends JPanel{
 		{
 			if(c instanceof Container)
 			{
-				if(c instanceof JPanel)
+				if(c instanceof JPanel || c instanceof JButton)
 				{
 					c.setBackground(new Color(backgroundColor[0],backgroundColor[1],backgroundColor[2]));
 				}
@@ -182,10 +200,15 @@ public class EventPanel extends JPanel{
 			}//end of score check
 			else if(e.getSource()==check){
 				int c = 0;
-				for(int i=0;i<each.length;i++){
-					if (orderList[i].getSelectedIndex()!= events[i].getPosition()){
+				int i=0;
+				while(i<each.length){
+					if(each[i].getEvent()==j.events.length-1) {
+					}
+					if (each[i].getPlace() != j.events[each[i].getEvent()].getPosition()){
 						c++;
-					}}
+					}
+					i++;
+				}
 				if (c==0){
 					checker.setText("Correct! Well Done!");
 					scoreLabel.setText("Final Score:");
@@ -203,7 +226,7 @@ public class EventPanel extends JPanel{
 					clueCount+=1;
 				}
 			}//end of clue event
-			else if(e.getSource()==quit){
+			if(e.getSource()==quit){
 				System.exit(0);
 			}
 			if (score<=0){
@@ -213,6 +236,12 @@ public class EventPanel extends JPanel{
 			}//end of score check
 			//STARSHIPLADs code
 			if(e.getSource()==timer) {
+				int i=0;
+				while(i<each.length) {
+					each[i].repaint();
+					i++;
+				}
+				
 				if(countdown>0) {
 					countdown--;
 					countdown1--;
@@ -228,7 +257,6 @@ public class EventPanel extends JPanel{
 						}
 						else {
 							backgroundColor[o] -= 5;
-							System.out.println(""+ backgroundColor[0] + " " + backgroundColor[1] + " " + backgroundColor[2]);
 							if(backgroundColor[o]<=0) {
 								backgroundColor[o]=0;
 							}
@@ -240,7 +268,6 @@ public class EventPanel extends JPanel{
 					countdown=1;
 				}
 				if(countdown1<=0) {
-					System.out.println("!!!!!!\t JOSIE ITS 100 \t!!!!");
 					backgroundColor = new int[]{rand.nextInt(255),rand.nextInt(255),rand.nextInt(255)};
 					countdown1=100;
 				}
