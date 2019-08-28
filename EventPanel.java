@@ -15,7 +15,13 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Random;
-
+/**
+ * 
+ * @author Lavoy
+ *Event Panel displays the main application frame for TripV2.
+ *It Randomly generates squares in the background as a paint function and calls
+ *supporting classes test methods when the UI is interacte with
+ */
 public class EventPanel extends JPanel{
 	JLabel [] names = new JLabel[TripV2.numEvents];
 	private JLabel checker= new JLabel("");
@@ -32,25 +38,26 @@ public class EventPanel extends JPanel{
 	private JLabel[] clueLabels = new JLabel[(TripV2.total-1)*2];
 	private JButton check = new JButton();
 	private JButton clue = new JButton();
-	/// STARSHIPLADS CODE
 	private JButton quit = new JButton ();
 	private Timer timer;
 	private int countdown,countdown1 =0;
 	private int[] backgroundColor;
 	private Random rand = new Random();
 	private BufferedImage[] images = new BufferedImage[3];
-	/// End of STARSHIPALDS CODE
+	private BufferedImage bf;
+	private Color bgColor;
+	private int circles;
 	Event[] events;
 	String[] clues;//=new String[(TripV2.total-1)*2];
 	private int score= -5+((TripV2.total-1)*6);
 	private int clueCount =0;
 	public EventPanel(Event[] events, String[] clues){
-
+		circles=0;
+		bgColor=new Color(0,0,0);
 		//setLayout(new BorderLayout());
 		for(int i=0; i<clueLabels.length; i++){
 			clueLabels[i]= new JLabel(""+(i+1)+")");
 		}//loop initializing clueLabels
-		/// STARSHIPLADS CODE
 		this.events= new Event[events.length+1];
 		for(int i=0; i<events.length; i++){
 			this.events[i]= events[i];
@@ -65,7 +72,6 @@ public class EventPanel extends JPanel{
 			each[p].setPreferredSize(new Dimension(250,66));
 			each[p].setLayout(new BorderLayout());
 		}
-		/// END OF STARSHIPLADS CODE
 		this.clues=clues;
 		ButtonListener b1= new ButtonListener(this);
 		cluePanel.setLayout(new GridLayout(((TripV2.total-1)*2),1));
@@ -91,8 +97,7 @@ public class EventPanel extends JPanel{
 		for(clueCount=0;clueCount<3;clueCount++){
 			clueLabels[clueCount].setText((clueCount+1)+") "+this.clues[clueCount]);
 		}//end of loop displaying first clues 
-		/// STARSHIPLADS CODE
-		
+
 		timer= new Timer(666,b1);
 		timer.start();
 		this.backgroundColor = new int[]{rand.nextInt(255),rand.nextInt(255),rand.nextInt(255)};
@@ -108,12 +113,13 @@ public class EventPanel extends JPanel{
 			check.setBorderPainted(false);
 			quit.setIcon(new ImageIcon(images[2]));
 			quit.setBorderPainted(false);
-			
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			System.exit(0);
 		}
+
 		buttonPanel.add(scoreLabel);
 		buttonPanel.add(scoreShow);
 		buttonPanel.add(check);
@@ -121,11 +127,16 @@ public class EventPanel extends JPanel{
 		buttonPanel.add(quit);
 		buttonPanel.add(checker);
 		quit.addActionListener(b1);
-		///End of STARSHIPLADS CODE
+		checker.setOpaque(false);
+		eventPanel.setOpaque(false);
+		cluePanel.setOpaque(false);
+		instructionPanel.setOpaque(false);
+		buttonPanel.setOpaque(false);
 		add(instructionPanel);
 		add(eventPanel);
 		add(cluePanel);
 		add(buttonPanel);
+
 	}//end of constructor
 	/**
 	 * playAudio file will play a given string URL to a .WAV file
@@ -165,6 +176,86 @@ public class EventPanel extends JPanel{
 		}
 		clip.start();
 	}
+	public Image addSquare(BufferedImage b,int i) {
+		if(i%5==0) {
+			Graphics gb= b.getGraphics();
+			Random rand=new Random();
+			gb.setColor(new Color(rand.nextInt(255),rand.nextInt(255),rand.nextInt(255)));
+			int x= rand.nextInt(b.getWidth());
+			int y= rand.nextInt(b.getHeight());
+			gb.fillRect(rand.nextInt(b.getWidth()),rand.nextInt(b.getHeight()),x/10,x/10);
+
+			gb.dispose();
+			
+		}
+		return b;
+		
+	}
+	public void paint(Graphics g) {
+
+		if(bf==null) {
+			bf = new BufferedImage(getWidth(),getHeight(), BufferedImage.TYPE_INT_RGB);
+			Graphics gb=bf.getGraphics();
+			Random rand=new Random();
+			Color c=new Color(rand.nextInt(255),rand.nextInt(255),rand.nextInt(255));
+			gb.setColor(c);
+			gb.fillRect(0,0,bf.getWidth(),bf.getHeight());
+			gb.dispose();
+			bgColor=c;
+		}
+		Image f=addSquare(bf,circles);
+		g.drawImage(f,0,0,getWidth(),getHeight(),0,0,f.getWidth(null),f.getHeight(null),null);
+		BufferedImage bfi=new BufferedImage(f.getWidth(null),f.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+
+		// Draw the image on to the buffered image
+		Graphics2D bGr = bfi.createGraphics();
+		bGr.drawImage(f, 0, 0, null);
+		bGr.dispose();
+		bf=bfi;
+		/*
+		File outputfile = new File("image.jpg");
+		try {
+			ImageIO.write(bfi, "jpg", outputfile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		*/
+		super.paint(g);
+	}
+	@Override
+	public void paintComponent(Graphics g){
+		if(bf==null) {
+			bf = new BufferedImage(getWidth(),getHeight(), BufferedImage.TYPE_INT_RGB);
+			Graphics gb=bf.getGraphics();
+			Random rand=new Random();
+			Color c=new Color(rand.nextInt(255),rand.nextInt(255),rand.nextInt(255));
+			gb.setColor(c);
+			gb.fillRect(0,0,bf.getWidth(),bf.getHeight());
+			gb.dispose();
+			bgColor=c;
+		}
+		Image f=addSquare(bf,circles);
+		g.drawImage(f,0,0,getWidth(),getHeight(),0,0,f.getWidth(null),f.getHeight(null),null);
+		BufferedImage bfi=new BufferedImage(f.getWidth(null),f.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+
+		// Draw the image on to the buffered image
+		Graphics2D bGr = bfi.createGraphics();
+		bGr.drawImage(f, 0, 0, null);
+		bGr.dispose();
+		bf=bfi;
+		/*
+		File outputfile = new File("image.jpg");
+		try {
+			ImageIO.write(bfi, "jpg", outputfile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		*/
+		super.paintChildren(g);
+
+	}
 	/**
 	 * setPanelColors is used to mass-repaint a component, and all its children's backgrounds
 	 * 
@@ -180,11 +271,12 @@ public class EventPanel extends JPanel{
 			{
 				if(c instanceof JPanel || c instanceof JButton)
 				{
-					c.setBackground(new Color(backgroundColor[0],backgroundColor[1],backgroundColor[2]));
+					c.setBackground(bgColor);
 				}
 
 				setPanelColor((Container)c);
 			}
+			c.setForeground(Color.black);
 		}
 	}
 	private class ButtonListener implements ActionListener{
@@ -237,11 +329,12 @@ public class EventPanel extends JPanel{
 			//STARSHIPLADs code
 			if(e.getSource()==timer) {
 				int i=0;
+
 				while(i<each.length) {
 					each[i].repaint();
 					i++;
 				}
-				
+
 				if(countdown>0) {
 					countdown--;
 					countdown1--;
@@ -263,14 +356,17 @@ public class EventPanel extends JPanel{
 						}
 						o++;
 					}
-					setBackground(new Color(backgroundColor[0],backgroundColor[1],backgroundColor[2]));
+					//bgColor=new Color(backgroundColor[0],backgroundColor[1],backgroundColor[2]);
 					setPanelColor(j);
 					countdown=1;
 				}
 				if(countdown1<=0) {
-					backgroundColor = new int[]{rand.nextInt(255),rand.nextInt(255),rand.nextInt(255)};
+					//backgroundColor = new int[]{rand.nextInt(255),rand.nextInt(255),rand.nextInt(255)};
 					countdown1=100;
 				}
+				circles++;
+				System.out.println(circles);
+				repaint();
 			}
 			//End of STARSHIPLADs code
 		}//end of method action performed
