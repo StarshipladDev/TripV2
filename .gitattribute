@@ -1,0 +1,4 @@
+#Remove .rtf files from linuistic search nad make java files readable for front page
+
+*.java    linguist-detectable=true
+*.rtf     linguist-detectable=false
